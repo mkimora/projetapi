@@ -33,11 +33,7 @@ class Operations
      */
     private $dateDepot;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Compte", mappedBy="operation")
-     */
-    private $comptes;
-
+   
 
     public function getId(): ?int
     {
@@ -80,35 +76,7 @@ class Operations
         return $this;
     }
 
-    /**
-     * @return Collection|Compte[]
-     */
-    public function getComptes(): Collection
-    {
-        return $this->comptes;
-    }
 
-    public function addCompte(Compte $compte): self
-    {
-        if (!$this->comptes->contains($compte)) {
-            $this->comptes[] = $compte;
-            $compte->setOperation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCompte(Compte $compte): self
-    {
-        if ($this->comptes->contains($compte)) {
-            $this->comptes->removeElement($compte);
-            // set the owning side to null (unless already changed)
-            if ($compte->getOperation() === $this) {
-                $compte->setOperation(null);
-            }
-        }
-
-        return $this;
-    }
+   
 
 }

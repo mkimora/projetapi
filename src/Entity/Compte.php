@@ -33,11 +33,6 @@ class Compte
      */
     private $depot;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\operations", inversedBy="comptes")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $operation;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\partenaire", inversedBy="comptes")
@@ -45,9 +40,11 @@ class Compte
      */
     private $partenaire;
 
+
     public function __construct()
     {
         $this->utilisateurs = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -91,17 +88,6 @@ class Compte
         return $this;
     }
 
-    public function getOperation(): ?operations
-    {
-        return $this->operation;
-    }
-
-    public function setOperation(?operations $operation): self
-    {
-        $this->operation = $operation;
-
-        return $this;
-    }
 
     public function getPartenaire(): ?partenaire
     {
@@ -114,4 +100,7 @@ class Compte
 
         return $this;
     }
+
+
+    
 }

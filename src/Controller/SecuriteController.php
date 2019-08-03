@@ -1,18 +1,20 @@
 <?php
 
 namespace App\Controller;
+
 use App\Entity\User;
+use App\Entity\Compte;
 use App\Entity\Partenaire;
-use App\Repository\PartenaireRepository;
+use App\Repository\userRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\partenairePasswordEncoderInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 
 
@@ -21,46 +23,26 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class SecuriteController extends AbstractController
 {
-     /**
+    /**
      * @Route("/register", name="register", methods={"POST"})
      */
-    public function register(Request $request, partenairePasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager)
+    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager)
     {
         $values = json_decode($request->getContent());
-        if(isset($values->partenairename,$values->password)) {
-            $partenaire = new partenaire();
-            $partenaire->setpartenairename($values->partenairename);
-            $partenaire->setRoles(array('ROLE_partenaire'));
-            $partenaire->setPassword($passwordEncoder->encodePassword($partenaire, $values->password));
-            $partenaire->setNom($values->nom);
-            $partenaire->setPrenom($values->prenom);
-            $partenaire->setAdresse($values->adresse);
-            $partenaire->setEtatU($values->etat_u);
-            $entityManager->persist($partenaire);
-            $entityManager->flush();
+        if (isset($values->username, $values->password)) {
+            $user = new user();
+            $user->setusername($values->username);
+            $user->setRoles($values->roles);
+            $user->setPassword($passwordEncoder->encodePassword($user, $values->password));
+            $user->setNom($values->nom);
+            $user->setPrenom($values->prenom);
+            $user->setAdresse($values->adresse);
+            $user->setEtatU($values->etat_u);
 
-            $data = [
-                'statut' => 201,
-                'mess' => 'L\'utilisateur a été créé'
-            ];
 
-            return new JsonResponse($data, 201);
-        }
-        $data = [
-            'statut' => 500,
-            'mess' => 'Vous devez renseigner les clés partenairename et password'
-        ];
-        return new JsonResponse($data, 500);
-    }
-            
 
-    /**
-     * @Route("/addP", name="partenaire", methods={"POST"})
-     */
-    public function addP(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, ValidatorInterface $validator)
-    {
-        $values = json_decode($request->getContent());
-        if(isset($values->nompartenaire,$values->numComptP)) {
+
+
             $partenaire = new Partenaire();
             $partenaire->setNompartenaire($values->nompartenaire);
             $partenaire->setAdresse($values->adresse);
@@ -68,10 +50,41 @@ class SecuriteController extends AbstractController
             $partenaire->setRaisonSociale($values->raison_sociale);
             $partenaire->setNinea($values->ninea);
             $partenaire->setEtatP($values->etat_p);
-            $partenaire->setnumComptP($values->numComptP);
+            $partenaire->setnumComptP($values->num_compt_p);
 
+
+
+
+
+
+            $compte = new Compte();
+
+            $compte->setNumCompte($values->num_compte);
+            $compte->setProprioCompte($values->proprio_compte);
+            $compte->setDepot($values->depot);
+
+            //relation user et partenaire
+            $user->setPartenaire($partenaire);
+            //relation user et compte
+            $user->setCompte($compte);
+            //relation partenaire et compte
+            $compte->setPartenaire($partenaire);
+
+
+
+
+            $entityManager->persist($user);
             $entityManager->persist($partenaire);
+            $entityManager->persist($compte);
             $entityManager->flush();
+
+
+
+
+
+
+
+
 
             $data = [
                 'statut' => 201,
@@ -79,28 +92,31 @@ class SecuriteController extends AbstractController
             ];
 
             return new JsonResponse($data, 201);
+
+            $data = [
+                'statut' => 500,
+                'mess' => 'Vous devez renseigner les clés username et password'
+            ];
+            return new JsonResponse($data, 500);
         }
-        $data = [
-            'statut' => 500,
-            'mess' => 'Vous devez renseigner les clés nompartenaire et num_compt_p'
-        ];
-        return new JsonResponse($data, 500);
     }
     /**
      * @Route("/login", name="login", methods={"POST"})
      */
     public function login(Request $request)
     {
-        $partenaire = $this->getpartenaire();
+        $user = $this->getuser();
         return $this->json([
-            'partenairename' => $partenaire->getpartenairename(),
-            'roles' => $partenaire->getRoles()
+            'username' => $user->getusername(),
+            'roles' => $user->getRoles()
         ]);
 
-        if($partenaire-getEtat_U()=="bloqué"){
+        if ($user - getEtat_U() == "bloqué") {
             return $this->json([
                 'message' => 'ACCÈS REFUSÉ'
             ]);
         }
     }
+
+    
 }

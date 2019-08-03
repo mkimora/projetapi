@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
@@ -53,6 +56,11 @@ class User implements UserInterface
      */
     private $etatU;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\partenaire")
+     */
+    private $partenaire;
+
     
 
     /**
@@ -79,7 +87,7 @@ class User implements UserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = '';
 
         return array_unique($roles);
     }
@@ -167,6 +175,30 @@ class User implements UserInterface
     public function setEtatU(string $etatU): self
     {
         $this->etatU = $etatU;
+
+        return $this;
+    }
+
+    public function getCompte(): ?compte
+    {
+        return $this->compte;
+    }
+
+    public function setCompte(?compte $compte): self
+    {
+        $this->compte = $compte;
+
+        return $this;
+    }
+
+    public function getPartenaire(): ?partenaire
+    {
+        return $this->partenaire;
+    }
+
+    public function setPartenaire(?partenaire $partenaire): self
+    {
+        $this->partenaire = $partenaire;
 
         return $this;
     }
